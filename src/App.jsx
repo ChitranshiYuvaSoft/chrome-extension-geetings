@@ -1,36 +1,104 @@
-import { useState, useEffect } from 'react';
-
+import React, { useEffect, useRef, useState } from "react";
+import "./App.css"
 const App = () => {
-  const [time, setTime] = useState(new Date());
-  const [greeting, setGreeting] = useState('');
+  const [cursorVisible, setCursorVisible] = useState(true);
+  const [cursorPos, setCursorPos] = useState({ x: 0, y: 0 });
+  const div1Ref = useRef(null);
+  const div2Ref = useRef(null);
 
   useEffect(() => {
-    const interval = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(interval);
+    const handleMouseMove = (e) => {
+      setCursorPos({ x: e.clientX, y: e.clientY });
+    };
+
+    const div2 = document.querySelector(".div2");
+
+    const handleMouseEnter = () => setCursorVisible(false);
+    const handleMouseLeave = () => setCursorVisible(true);
+
+    const handleMouseMoveDiv2 = (e) => {
+      const div2Rect = div2.getBoundingClientRect();
+      const midPoint = div2Rect.height / 2;
+
+      if (e.clientY < midPoint) {
+        div2.scrollBy({ top: -10, behavior: "smooth" });
+      } else {
+        div2.scrollBy({ top: 10, behavior: "smooth" });
+      }
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+
+    if (div2) {
+      div2.addEventListener("mouseenter", handleMouseEnter);
+      div2.addEventListener("mouseleave", handleMouseLeave);
+      div2.addEventListener("mousemove", handleMouseMoveDiv2);
+    }
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      if (div2) {
+        div2.removeEventListener("mouseenter", handleMouseEnter);
+        div2.removeEventListener("mouseleave", handleMouseLeave);
+        div2.removeEventListener("mousemove", handleMouseMoveDiv2);
+      }
+    };
   }, []);
 
-  useEffect(() => {
-    const hour = time.getHours();
-    if (hour < 12) setGreeting('Good Morning, Chitranshi ☀️');
-    else if (hour < 18) setGreeting('Good Afternoon, Chitranshi 🌤️');
-    else setGreeting('Good Evening, Chitranshi 🌙');
-  }, [time]);
 
-  const formatTime = (date) =>
-    date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const calculateGap = () => {
+    if (div1Ref.current && div2Ref.current) {
+      const div1Top = div1Ref.current.getBoundingClientRect().top;
+      const div2Top = div2Ref.current.getBoundingClientRect().top;
+      const gap = Math.abs(div2Top - div1Top);
+
+      if (gap === 16 && !eventFired) {
+        handleGapReached();
+      } else if (gap !== 16) {
+
+        console.log("bhoooot jedda gap he ")
+      }
+    }
+  };
+
+  const handleGapReached = () => {
+    console.log("The gap between the tops of the divs is exactly 16px!");
+    alert("Gap is 16px!");
+  };
+  useEffect(() => {
+    const div2 = div2Ref.current;
+  
+    if (div2) {
+      div2.addEventListener("scroll", calculateGap);
+      calculateGap(); // Initial calculation
+    }
+  
+    return () => {
+      if (div2) {
+        div2.removeEventListener("scroll", calculateGap);
+      }
+    };
+  }, []);
+
 
   return (
-    <div className="h-screen flex flex-col items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
-      <h1 className="text-5xl font-bold">{greeting}</h1>
-      <p className="text-3xl mt-4">{formatTime(time)}</p>
-      <input
-        type="text"
-        placeholder="Search Google..."
-        className="mt-6 p-3 w-1/2 text-black rounded-lg"
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') window.open(`https://www.google.com/search?q=${e.target.value}`, '_blank');
-        }}
-      />
+    <div className="w-[328px] relative bg-white h-screen overflow-hidden overflow-y-auto scrollbar-hide"  ref={div1Ref}>
+      <div className="flex flex-col div1 gap-2 fixed top-0 left-0 w-[328px] z-10">
+        <div className="rounded-3xl div1.1  bg-[#A098CF] h-[130px]"></div>
+        <div className='rounded-3xl div1.2 bg-[url("./assets/building.png")] bg-no-repeat bg-cover bg-center h-[225px]'></div>
+      </div>
+
+      {/* <div className="rounded-3xl div2 absolute top-[355px] w-full bg-[#ffffffa6]  z-20 scrollbar-hide p-4  cursor-none"> */}
+      <div className="rounded-3xl div2 absolute top-[355px] w-full bg-[#ffffffa6]  z-20 scrollbar-hide p-4  cursor-none"ref={div2Ref}>
+        <h2 className="heading">Header</h2>
+        <p>
+          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Incidunt ad dignissimos quod commodi saepe numquam impedit natus nihil obcaecati mollitia cupiditate, ex praesentium, pariatur, dicta est vero quam dolorem consequuntur sunt. Ipsa reprehenderit tempore quas architecto minima. Sequi harum maiores corrupti sed laudantium cum sapiente quaerat vero nobis, cumque earum rerum temporibus in quis modi esse tempora totam est maxime sint dolorum. Ut expedita optio quo veniam saepe eaque iusto velit aliquam dignissimos minus unde aut, quod voluptates, maiores quaerat perspiciatis, quos facilis ex quasi aspernatur sit rerum? Expedita accusamus asperiores in iusto praesentium eaque iure assumenda fugiat fugit repellat! Quaerat amet dolorum sequi voluptatum culpa est nostrum, quibusdam, voluptatibus voluptates, inventore exercitationem. Odio maxime maiores ea neque molestias, consectetur repudiandae sed quis quidem labore vero assumenda corporis atque optio eius! Nulla tempora iure itaque ab illum quasi veniam, et minus dignissimos libero. Sed nihil tenetur eos mollitia vero. Excepturi, ad quibusdam voluptatum dolores consectetur eum dolore corporis, tempora, praesentium culpa delectus. Dolor libero repudiandae, voluptatum saepe nostrum vel doloribus repellat harum distinctio tenetur illum sed id. Laudantium beatae iusto, amet, tenetur delectus odit temporibus nemo voluptatum maxime consequatur enim perspiciatis debitis obcaecati aliquid eaque eveniet vitae deserunt, porro sunt reprehenderit. Eum, omnis odit! Amet esse officiis enim est expedita. Deleniti placeat minus mollitia perferendis amet, voluptatum ullam ut sint dolorum exercitationem doloribus ratione tenetur. Officiis repellat libero cupiditate magni eligendi eius facilis molestias debitis porro illo praesentium, qui minima voluptate! Ducimus illum voluptate blanditiis numquam quibusdam asperiores vero nisi corporis in eligendi fugiat odio at ut id quod ab dolores similique adipisci, molestias dolore explicabo qui nihil, ad sed. Libero deleniti minus corporis tempora numquam necessitatibus eligendi obcaecati quam! Quasi saepe eum dicta quae ipsa, excepturi quisquam sequi cumque tempora alias, doloremque natus pariatur laboriosam dolor sunt aut, nisi in voluptatem accusamus ratione dolorum vitae ipsum deserunt. Minus rem error obcaecati labore. Voluptatibus sed iure excepturi fuga magnam? Laboriosam fugit quae consequuntur aut veniam? Animi iusto totam voluptates nobis, qui quia nesciunt sed repellat! Ut saepe omnis enim porro fuga obcaecati dolorem, maxime facere voluptates a velit iure expedita, pariatur rerum hic distinctio nihil unde laudantium illo molestias labore consequuntur? Ea consequatur exercitationem saepe impedit maiores, ratione asperiores! Possimus explicabo, placeat, pariatur et consequuntur soluta quos quo distinctio porro velit dolorem rem non natus magni vel, alias ipsam consequatur ratione tempore nesciunt? Molestias voluptas sapiente adipisci dolorum doloremque fugiat amet dolorem recusandae velit. Harum quis quo numquam illo reiciendis.
+        </p>
+      </div>
+
+      {!cursorVisible && (
+        <div className='fixed w-[68px] h-[109px] pointer-events-none bg-[url("./assets/scroll.png")]  z-40 bg-cover bg-center' style={{ top: `${cursorPos.y}px`, left: `${cursorPos.x}px` }} />
+      )}
     </div>
   );
 };
